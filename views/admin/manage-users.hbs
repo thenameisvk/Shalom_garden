@@ -1,0 +1,98 @@
+<div class="container mt-4 pt-5">
+  <h3 class="mb-4" style="color:#2d5a27;">👥 Manage Users</h3>
+
+  {{#if users.length}}
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each users}}
+        <tr>
+          <td>{{add @index 1}}</td>
+          <td>{{this.name}}</td>
+          <td>{{this.email}}</td>
+
+          <td>
+            {{#if this.isBlocked}}
+              <span class="badge bg-danger">Blocked</span>
+            {{else}}
+              <span class="badge bg-success">Active</span>
+            {{/if}}
+          </td>
+          <td class="d-flex gap-2">
+            <!-- Toggle Block/Unblock -->
+            <form action="/admin/manage-users/toggle/{{this._id}}" method="POST" class="d-inline">
+              {{#if this.isBlocked}}
+                <button class="btn btn-sm btn-success">Unblock</button>
+              {{else}}
+                <button class="btn btn-sm btn-danger">Block</button>
+              {{/if}}
+            </form>
+
+            <!-- View Reviews Button -->
+            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reviewsModal-{{this._id}}">
+              View Reviews
+            </button>
+          </td>
+        </tr>
+
+        <!-- 🔽 Modal for User Reviews -->
+        <div class="modal fade" id="reviewsModal-{{this._id}}" tabindex="-1">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Reviews by {{this.name}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                {{#if this.reviews.length}}
+                  <ul class="list-group">
+                    {{#each this.reviews}}
+                      <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                          <strong>{{this.product.name}}</strong>
+                          <span class="ms-2">
+                            {{#if (eq this.rating 5)}}😍 Excellent
+                            {{else if (eq this.rating 4)}}😊 Good
+                            {{else if (eq this.rating 3)}}😐 Average
+                            {{else if (eq this.rating 2)}}☹️ Poor
+                            {{else}}😡 Bad{{/if}}
+                          </span>
+                          <p class="mb-1">{{this.comment}}</p>
+                          <small class="text-muted">{{formatDate this.date}}</small>
+                        </div>
+
+                        <!-- Admin Delete Button -->
+                        <form action="/admin/review/{{this._id}}/delete" method="POST">
+                          <button class="btn btn-sm btn-outline-danger"
+                                  onclick="return confirm('Are you sure you want to delete this review?')">
+                            Delete
+                          </button>
+                        </form>
+                      </li>
+                    {{/each}}
+                  </ul>
+                {{else}}
+                  <p class="text-muted text-center">No reviews by this user.</p>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+    <p class="text-center text-muted">No users found.</p>
+  {{/if}}
+</div>

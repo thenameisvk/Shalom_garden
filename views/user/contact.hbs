@@ -1,0 +1,48 @@
+<div class="container my-5 align-items-center" style="max-width:900px;">
+  <!-- Header -->
+  <div class="text-center mb-4">
+    <h2 class="fw-bold" style="color:#2d5a27;">📞 Contact Us</h2>
+    <p class="text-muted">We are here to help you with any queries.</p>
+  </div>
+
+  {{#each admins}}
+
+    <!-- Right: Help & Support -->
+    <div class="col-md-6 align-items-center">
+      <h4 class="fw-bold mb-3" style="color:#2d5a27;">Help & Support</h4>
+      <div class="card p-3 shadow-sm border-0 mb-3">
+        <h6 class="fw-bold">📧 Email Support</h6>
+        <p>Send a mail</p>
+        <p class="mb-0">{{this.email}}</p>
+      </div>
+      <div class="card p-3 shadow-sm border-0 mb-3">
+        <h6 class="fw-bold">📱 Call / WhatsApp</h6>
+        <p>For clear your doubts, just call or send a message</p>
+        <p class="mb-0">+91 {{this.mobile}}</p>
+      </div>
+      
+
+      <!-- Social Media Links -->
+      <div class="mt-4">
+        <h5 class="fw-bold" style="color:#2d5a27;">Follow Us</h5>
+        <div class="d-flex gap-3 mt-2">
+          <a href="{{this.facebooklink}}" target="_blank" class="text-decoration-none">
+            <i class="bi bi-facebook fs-3 text-primary"></i>
+          </a>
+          <a href="{{this.instagramlink}}" target="_blank" class="text-decoration-none">
+            <i class="bi bi-instagram fs-3" style="color:#e1306c;"></i>
+          </a>
+          <a href="{{this.twitterlink}}" target="_blank" class="text-decoration-none">
+            <i class="bi bi-twitter fs-3 text-info"></i>
+          </a>
+          <a href="{{this.whatsapplink}}" target="_blank" class="text-decoration-none">
+            <i class="bi bi-whatsapp fs-3 text-success"></i>
+          </a>
+          <a href="{{this.youtubelink}}" target="_blank" class="text-decoration-none">
+            <i class="bi bi-youtube fs-3 text-danger"></i>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+  </div>
+</div>

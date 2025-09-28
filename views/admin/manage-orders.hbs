@@ -1,0 +1,73 @@
+<div class="container mt-4 pt-5">
+  <h3 class="mb-4" style="color:#2d5a27;">📋 Manage Orders</h3>
+
+  {{#if orders.length}}
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Order ID</th>
+          <th>User</th>
+          <th>Products</th>
+          <th>Total</th>
+          <th>Address</th>
+          <th>Status</th>
+          <th>Change Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each orders}}
+        <tr>
+          <td>{{this._id}}</td>
+          <td>
+            <strong>{{this.userId.name}}</strong><br>
+            <small>{{this.userId.email}}</small>
+            <small><br>{{this.mobile}}</small>
+          </td>
+          <td>
+            <ul class="list-unstyled mb-0">
+              {{#each this.products}}
+              <li>
+                {{this.productId.name}} (x{{this.quantity}}) - ₹{{multiply this.productId.price this.quantity}}
+              </li>
+              {{/each}}
+            </ul>
+          </td>
+          <td>₹{{this.total}}</td>
+          <td>
+            {{this.address}} <br>
+            PM:{{this.paymentMethod}} <br>
+            Pincode: {{this.pincode}} <br>
+            {{#if this.locationLink}}
+              <a href="{{this.locationLink}}" target="_blank" class="text-primary">View Location</a>
+            {{/if}}
+          </td>
+          <td>
+            <span class="badge 
+              {{#if (eq this.status "Delivered")}}bg-success
+              {{else if (eq this.status "Shipped")}}bg-info
+              {{else if (eq this.status "Cancelled")}}bg-danger
+              {{else}}bg-warning{{/if}}">
+              {{this.status}}
+            </span>
+          </td>
+          <td>
+            <form action="/admin/manage-orders/update-status/{{this._id}}" method="POST">
+              <select name="status" class="form-select form-select-sm mb-2">
+                <option value="Placed" {{#if (eq this.status "Placed")}}selected{{/if}}>Placed</option>
+                <option value="Shipped" {{#if (eq this.status "Shipped")}}selected{{/if}}>Shipped</option>
+                <option value="Delivered" {{#if (eq this.status "Delivered")}}selected{{/if}}>Delivered</option>
+                <option value="Cancelled" {{#if (eq this.status "Cancelled")}}selected{{/if}}>Cancelled</option>
+              </select>
+              <button class="btn btn-sm btn-success w-100">Update</button>
+            </form>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+    <p class="text-center text-muted">No orders found.</p>
+  {{/if}}
+</div>

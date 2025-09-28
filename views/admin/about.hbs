@@ -1,0 +1,97 @@
+<div class="container mt-4 pt-5">
+  <h2 class="mb-4 text-center" style="color:#2d5a27;font-weight:bold;">
+    {{#if adminInfo}}Edit{{else}}Add{{/if}} Admin Contact Details
+  </h2>
+  
+  {{#if success}}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{success}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {{/if}}
+  
+  {{#if error}}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{error}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {{/if}}
+
+  <form action="/admin/about" method="POST" class="p-4 shadow rounded align-items-center mx-auto"
+   style="background-color:#fff;max-width:600px;">
+   
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Email *</label>
+      <input type="email" name="email" class="form-control" 
+             value="{{#if adminInfo}}{{adminInfo.email}}{{/if}}" 
+             placeholder="Enter contact email" required>
+    </div>
+  
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Mobile *</label>
+        <input type="tel" name="mobile" class="form-control" 
+               value="{{#if adminInfo}}{{adminInfo.mobile}}{{/if}}" 
+               pattern="[6-9]{1}[0-9]{9}" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Instagram Link</label>
+        <input type="url" name="instagramlink" class="form-control" 
+               value="{{#if adminInfo}}{{adminInfo.instagramlink}}{{/if}}"
+               placeholder="https://instagram.com/yourpage">
+      </div>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold">WhatsApp Link</label>
+      <input type="url" name="whatsapplink" class="form-control" 
+             value="{{#if adminInfo}}{{adminInfo.whatsapplink}}{{/if}}"
+             placeholder="https://wa.me/91xxxxxxxxxx">
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Facebook Link</label>
+      <input type="url" name="facebooklink" class="form-control"
+             value="{{#if adminInfo}}{{adminInfo.facebooklink}}{{/if}}"
+             placeholder="https://facebook.com/yourpage">
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold">YouTube Link</label>
+      <input type="url" name="youtubelink" class="form-control" 
+             value="{{#if adminInfo}}{{adminInfo.youtubelink}}{{/if}}"
+             placeholder="https://youtube.com/yourchannel">
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Twitter Link</label>
+      <input type="url" name="twitterlink" class="form-control" 
+             value="{{#if adminInfo}}{{adminInfo.twitterlink}}{{/if}}"
+             placeholder="https://twitter.com/yourhandle">
+    </div>
+    
+    <button type="submit" class="btn w-100" style="background-color:#2d5a27;color:white;font-weight:600;">
+      {{#if adminInfo}}Update{{else}}Submit{{/if}} Contact Details
+    </button>
+    
+    {{#if adminInfo}}
+    <div class="text-center mt-3">
+      <a href="/user/contact" target="_blank" class="text-decoration-none">
+        <i class="bi bi-eye"></i> View Contact Page
+      </a>
+    </div>
+    {{/if}}
+  </form>
+</div>
+
+<script>
+// Simple form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+  const mobile = document.querySelector('input[name="mobile"]');
+  if (mobile.value && !/^[6-9]\d{9}$/.test(mobile.value)) {
+    e.preventDefault();
+    alert('Please enter a valid 10-digit Indian mobile number');
+    mobile.focus();
+  }
+});
+</script>

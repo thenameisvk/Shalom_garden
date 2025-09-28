@@ -1,0 +1,21 @@
+<div class="container text-center mt-5">
+  <h2 class="fw-bold" style="color:#2d5a27;">✅ Order Placed Successfully!</h2>
+
+  <p class="text-muted mb-4">
+    Your plants will be delivered soon. <br>
+    Payment Method: 
+    {{#if (eq paymentMethod "COD")}}
+      <span class="badge bg-secondary">Cash on Delivery</span>
+    {{else}}
+      <span class="badge bg-success">Razorpay (Online)</span>
+    {{/if}}
+  </p>
+
+  <div class="d-flex justify-content-center gap-3">
+    <a href="/orders" class="btn btn-outline-success">
+      <i class="bi bi-box-seam me-1"></i> View All Orders
+    </a>
+
+    
+  </div>
+</div>

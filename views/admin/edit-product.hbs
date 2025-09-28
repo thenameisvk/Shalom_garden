@@ -1,0 +1,43 @@
+<div class="container mt-4 pt-5">
+  <h2 class="mb-4 text-center" style="color:#2d5a27;font-weight:bold;">Edit Product</h2>
+  <form action="/admin/edit-product/{{product._id}}" method="POST" enctype="multipart/form-data" class="p-4 shadow rounded align-items-center mx-auto" 
+  style="background-color:#fff;max-width:600px;">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Product Name</label>
+      <input type="text" name="name" value="{{product.name}}" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Category</label>
+      <select name="category" class="form-select" required>
+        <option selected>{{product.category}}</option>
+        <option>Indoor Plant</option>
+        <option>Outdoor Plant</option>
+        <option>Succulent</option>
+        <option>Herb</option>
+        <option>Flowering Plant</option>
+         <option>Aquatic Plants</option>
+        <option>Accessories and Tools</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Price (₹)</label>
+        <input type="number" name="price" value="{{product.price}}" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Stock</label>
+        <input type="number" name="stock" value="{{product.stock}}" class="form-control" required>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Description</label>
+      <textarea name="description" class="form-control" rows="3" required>{{product.description}}</textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Current Image</label><br>
+      <img src="/images/products/{{product.image}}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
+      <input type="file" name="image" class="form-control mt-2" accept="image/*">
+    </div>
+    <button type="submit" class="btn w-100" style="background-color:#2d5a27;color:white;font-weight:600;">Update Product</button>
+  </form>
+</div>

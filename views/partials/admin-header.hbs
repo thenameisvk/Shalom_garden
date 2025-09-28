@@ -1,0 +1,59 @@
+<header class="d-flex justify-content-between align-items-center px-3 py-2 shadow-sm"
+        style="background:#2d5a27;color:#fff;position:fixed;top:0;left:0;right:0;z-index:1030;">
+  
+  <!-- Left Side: Back + Title -->
+  <div class="d-flex align-items-center">
+    <button onclick="window.history.back()" 
+            style="background:none;border:none;color:#fff;font-size:20px;margin-right:10px;">
+      <i class="bi bi-arrow-left"></i>
+    </button>
+    <h5 style="margin:0;font-weight:bold;">Shalom Garden – Admin</h5>
+  </div>
+
+  <!-- Right Side: Gear Toggle -->
+  <button class="btn bg-light p-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminNav">
+    <i class="bi bi-gear"></i>
+  </button>
+</header>
+
+<!-- Offcanvas Menu (Right Side) -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="adminNav" style="width:220px;">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" style="color:#2d5a27;font-weight:bold;">Admin Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body p-0">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <a href="/admin" class="text-decoration-none text-dark">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      <li class="list-group-item">
+        <a href="/admin/products" class="text-decoration-none text-dark">
+          <i class="bi bi-box-seam"></i>All Products
+        </a>
+      </li>
+      <li class="list-group-item">
+        <a href="/admin/manage-orders" class="text-decoration-none text-dark">
+          <i class="bi bi-cart4"></i>All Orders
+        </a>
+      </li>
+      <li class="list-group-item">
+        <a href="/admin/manage-users" class="text-decoration-none text-dark">
+          <i class="bi bi-people"></i>All Users
+        </a>
+      </li>
+      <li class="list-group-item">
+        <a href="/admin/about" class="text-decoration-none text-dark">
+          <i class="bi bi-info-circle"></i> About Us
+        </a>
+      </li>
+      <li class="list-group-item">
+        <a href="/admin/logout" class="text-decoration-none text-danger fw-bold">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,322 @@
+<div class="container mt-4">
+  <h3 class="mb-3" style="color:#2d5a27;font-weight:700;">Checkout</h3>
+
+  <!-- Checkout Form -->
+  <form id="checkoutForm">
+    <!-- User Details -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Name</label>
+      <input type="text" class="form-control" value="{{user.name}}" disabled>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Email</label>
+      <input type="email" class="form-control" value="{{user.email}}" disabled>
+    </div>
+
+    <!-- Phone Number -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Phone Number *</label>
+      <input type="text" name="mobile" class="form-control" required 
+             pattern="[6-9]{1}[0-9]{9}" 
+             title="Enter a valid 10-digit Indian number"
+             placeholder="Enter your 10-digit mobile number">
+      <div class="form-text">We'll use this for order updates</div>
+    </div>
+
+    <!-- Address -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Delivery Address *</label>
+      <textarea name="address" class="form-control" rows="3" required 
+                placeholder="Enter your complete delivery address"></textarea>
+    </div>
+
+    <!-- Location Link -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Google Map Location Link *</label>
+      <input type="url" name="locationLink" class="form-control" 
+             placeholder="Paste Google Maps link here" required>
+      <div class="form-text">
+        <a href="https://www.google.com/maps" target="_blank" style="font-size:12px;color:#0d6efd;">
+          <i class="bi bi-geo-alt-fill"></i> Open Google Maps to get your location link
+        </a>
+      </div>
+    </div>
+
+    <!-- Pincode -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Pincode *</label>
+      <input type="text" name="pincode" class="form-control" pattern="[0-9]{6}" required
+             title="Enter a valid 6-digit pincode"
+             placeholder="Enter 6-digit pincode">
+    </div>
+
+    <!-- Order Summary Card -->
+    <div class="card p-3 shadow-sm mb-4" style="border-radius:12px;">
+      <h5 class="fw-bold mb-3">Order Summary</h5>
+      <p class="d-flex justify-content-between">
+        <span>Subtotal</span> <span>₹{{cartTotal}}</span>
+      </p>
+      <p class="d-flex justify-content-between">
+        <span>Delivery Fee</span> <span>₹50</span>
+      </p>
+      <hr>
+      <p class="d-flex justify-content-between fs-5 fw-bold">
+        <span>Total Amount</span> <span style="color:#2d5a27;">₹{{grandTotal}}</span>
+      </p>
+      <input type="hidden" name="total" value="{{grandTotal}}">
+
+      <!-- Payment Buttons -->
+      <div class="d-flex gap-2 mt-3">
+        <button type="button" id="codBtn" class="btn btn-outline-success w-50">
+          <i class="bi bi-cash-stack"></i> Cash on Delivery
+        </button>
+        <button type="button" id="payOnlineBtn" class="btn btn-success w-50">
+          <i class="bi bi-credit-card"></i> Pay Online
+        </button>
+      </div>
+      
+      <!-- Loading Spinner (hidden by default) -->
+      <div id="loadingSpinner" class="text-center mt-3" style="display: none;">
+        <div class="spinner-border text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Processing your order...</p>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="errorMessage">
+        <!-- Error message will be inserted here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+// Show error modal function
+function showError(message) {
+  document.getElementById('errorMessage').textContent = message;
+  new bootstrap.Modal(document.getElementById('errorModal')).show();
+}
+
+// Show/hide loading spinner
+function setLoading(show) {
+  document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+  document.getElementById('payOnlineBtn').disabled = show;
+  document.getElementById('codBtn').disabled = show;
+}
+
+// Validate form function
+function validateForm() {
+  const form = document.getElementById('checkoutForm');
+  const requiredFields = form.querySelectorAll('[required]');
+  
+  for (const field of requiredFields) {
+    if (!field.value.trim()) {
+      showError(`Please fill in the ${field.labels[0].textContent} field`);
+      field.focus();
+      return false;
+    }
+    
+    // Validate mobile number pattern
+    if (field.name === 'mobile' && !field.checkValidity()) {
+      showError('Please enter a valid 10-digit Indian mobile number');
+      field.focus();
+      return false;
+    }
+    
+    // Validate pincode pattern
+    if (field.name === 'pincode' && !field.checkValidity()) {
+      showError('Please enter a valid 6-digit pincode');
+      field.focus();
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+// COD Button Handler
+document.getElementById("codBtn").addEventListener("click", async () => {
+  if (!validateForm()) return;
+  
+  setLoading(true);
+  
+  try {
+    const formData = new FormData(document.getElementById("checkoutForm"));
+    const formObject = Object.fromEntries(formData.entries());
+    
+    const response = await fetch("/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formObject)
+    });
+    
+    if (response.ok) {
+      window.location.href = "/order-success?paymentMethod=COD";
+    } else {
+      const errorData = await response.json();
+      showError(errorData.message || "Failed to place COD order");
+    }
+  } catch (err) {
+    console.error("COD Error:", err);
+    showError("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+});
+
+// Online Payment Button Handler
+document.getElementById("payOnlineBtn").addEventListener("click", async () => {
+  if (!validateForm()) return;
+  
+  setLoading(true);
+  
+  try {
+    // Collect form data
+    const formData = new FormData(document.getElementById("checkoutForm"));
+    const formObject = Object.fromEntries(formData.entries());
+    
+    // 1️⃣ Create order on server WITH form data
+    const res = await fetch("/create-razorpay-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formObject)
+    });
+    
+    const data = await res.json();
+    
+    if (!data.success) {
+      showError(data.message || "Failed to create payment order. Please try again.");
+      return;
+    }
+    
+    setLoading(false); // Hide loading before opening Razorpay modal
+    
+    // 2️⃣ Open Razorpay Checkout
+    const options = {
+      key: "{{RAZORPAY_KEY_ID}}",
+      amount: data.amount,
+      currency: data.currency,
+      name: "Shalom Garden",
+      description: "Plant Purchase",
+      order_id: data.rzpOrderId,
+      handler: async function (response) {
+        setLoading(true); // Show loading during verification
+        
+        try {
+          console.log("✅ Razorpay Payment Success:", response);
+          
+          // 3️⃣ Verify payment on server with correct parameters
+          const verifyRes = await fetch("/verify-payment", {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+          
+          const verifyData = await verifyRes.json();
+          
+          if (verifyData.success) {
+            window.location.href = verifyData.redirectUrl || "/order-success?paymentMethod=ONLINE";
+          } else {
+            showError(verifyData.message || "Payment verification failed. Please contact support.");
+          }
+        } catch (verifyErr) {
+          console.error("Verification Error:", verifyErr);
+          showError("Error verifying payment. Please contact support.");
+        } finally {
+          setLoading(false);
+        }
+      },
+      prefill: {
+        name: "{{session.user.name}}",
+        email: "{{session.user.email}}",
+        contact: formObject.mobile
+      },
+      theme: { 
+        color: "#2d5a27" 
+      },
+      modal: {
+        ondismiss: function() {
+          setLoading(false);
+          console.log("Payment modal closed by user");
+        }
+      }
+    };
+    
+    const rzp = new Razorpay(options);
+    rzp.open();
+    
+  } catch (err) {
+    console.error("Payment Error:", err);
+    showError("Something went wrong. Please try again.");
+    setLoading(false);
+  }
+});
+
+// Prevent form submission on enter key
+document.getElementById("checkoutForm").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+  }
+});
+</script>
+
+<style>
+.form-label {
+  color: #2d5a27;
+  font-weight: 600;
+}
+
+.btn-success {
+  background-color: #2d5a27;
+  border-color: #2d5a27;
+}
+
+.btn-success:hover {
+  background-color: #1e3f1a;
+  border-color: #1e3f1a;
+}
+
+.btn-outline-success {
+  color: #2d5a27;
+  border-color: #2d5a27;
+}
+
+.btn-outline-success:hover {
+  background-color: #2d5a27;
+  color: white;
+}
+
+.card {
+  border: 2px solid #e8f5e8;
+}
+
+.form-control:focus {
+  border-color: #2d5a27;
+  box-shadow: 0 0 0 0.2rem rgba(45, 90, 39, 0.25);
+}
+</style>

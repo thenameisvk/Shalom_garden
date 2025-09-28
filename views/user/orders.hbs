@@ -1,0 +1,137 @@
+<h3 class="mb-4" style="color:#2d5a27;">📦 My Orders</h3>
+
+{{#if orders.length}}
+  {{#each orders}}
+  <div class="card shadow-sm mb-4" style="border-radius:12px;">
+    <div class="card-body">
+      <!-- Header with Order # and Status -->
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold" style="color:#2d5a27;">Order #{{add @index 1}}</h5>
+        <span class="badge 
+          {{#if (eq this.status "Delivered")}}bg-success
+          {{else if (eq this.status "Shipped")}}bg-info
+          {{else if (eq this.status "Cancelled")}}bg-danger
+          {{else}}bg-warning{{/if}}">
+          {{this.status}}
+        </span>
+      </div>
+      <p class="text-muted mb-1">
+        <small>Ordered on {{formatDate this.createdAt}}</small> | 
+        <small><strong>Payment:</strong> {{this.paymentMethod}}</small>
+      </p>
+
+      <!-- Products Table -->
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Review</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each this.products}}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <img src="/images/products/{{this.productId.image}}" 
+                       style="width:50px;height:50px;object-fit:cover;border-radius:6px;margin-right:10px;">
+                  <span>{{this.productId.name}}</span>
+                </div>
+              </td>
+              <td>{{this.quantity}}</td>
+              <td>₹{{multiply this.productId.price this.quantity}}</td>
+              <td>
+                {{#if (eq ../this.status "Delivered")}}
+                  <a href="/product/{{this.productId._id}}/reviews" class="btn btn-sm btn-outline-success">
+                    {{#if this.review}}View Review{{else}}Add Review{{/if}}
+                  </a>
+                {{else}}
+                  <span class="text-muted">N/A</span>
+                {{/if}}
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Address Section -->
+      <p class="fw-semibold mb-0">📍 Delivery Address: {{this.address}}</p>
+      <p class="fw-semibold mb-0">📱 Mobile: {{this.mobile}}</p>
+      <p class="fw-semibold mb-2">📮 Pincode: {{this.pincode}}</p>
+      {{#if this.locationLink}}
+        <p><a href="{{this.locationLink}}" target="_blank" class="btn btn-sm btn-outline-primary">View Location</a></p>
+      {{/if}}
+
+      <!-- Buttons: Edit & Cancel (Only if order not shipped/delivered/cancelled) -->
+      {{#if (eq this.status "Placed")}}
+        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal-{{this._id}}">
+          ✏️ Edit Address
+        </button>
+
+        <form action="/orders/cancel/{{this._id}}" method="POST" class="d-inline">
+          <button class="btn btn-outline-danger btn-sm"
+            onclick="return confirm('Are you sure you want to cancel this order?');">
+            ❌ Cancel Order
+          </button>
+        </form>
+      {{/if}}
+
+      <!-- Order Status Messages -->
+      {{#if (eq this.status "Delivered")}}
+      <div class="alert alert-success text-center mt-3" style="border-radius:8px;">
+        ✅ Your order has been delivered successfully!
+      </div>
+      {{/if}}
+
+      {{#if (eq this.status "Cancelled")}}
+      <div class="alert alert-danger text-center mt-3" style="border-radius:8px;">
+        ❌ This order has been cancelled.
+      </div>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- Modal for Address Editing -->
+  <div class="modal fade" id="editModal-{{this._id}}" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="/orders/update-address/{{this._id}}" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Address</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label>Address</label>
+              <textarea name="address" class="form-control" required>{{this.address}}</textarea>
+            </div>
+            <div class="mb-3">
+              <label>Phone Number</label>
+              <input type="number" name="mobile" class="form-control" value="{{this.mobile}}" pattern="[6-9]\d{9}" required>
+            </div>
+            <div class="mb-3">
+              <label>Pincode</label>
+              <input type="text" name="pincode" class="form-control" value="{{this.pincode}}" pattern="\d{6}" required>
+            </div>
+            <div class="mb-3">
+              <label>Location Link</label>
+              <input type="url" name="locationLink" class="form-control" value="{{this.locationLink}}">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-success">Save Changes</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {{/each}}
+{{else}}
+  <p class="text-center text-muted">You have no orders yet.</p>
+{{/if}}

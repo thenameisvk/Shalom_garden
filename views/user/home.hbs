@@ -1,0 +1,254 @@
+<div class="container pt-4" id="homeContainer">
+
+  <!-- SEARCH BAR -->
+  <div id="searchWrapper" class="mb-3 position-relative">
+    <input id="searchInput" type="text" class="form-control form-control-lg shadow-sm"
+           placeholder="Search plants..." style="border-radius:10px;padding-right:44px;">
+    <button id="clearSearchBtn" class="btn btn-sm btn-outline-secondary position-absolute"
+            style="right:8px;top:8px;height:38px;border-radius:8px;display:none;">✖</button>
+  </div>
+
+  <!-- HORIZONTAL CATEGORY BAR -->
+  <div id="categoryWrapper" class="mb-3 d-flex">
+    <div class="d-flex flex-row gap-5 overflow-auto pb-2 flex-grow-1" style="align-items:center;">
+      <!-- NOTE: data-category values are normalized in JS, so capitalization/spacing mismatches are handled -->
+      <span class="badge category-filter active-cat" data-category="all"
+            >All</span>
+
+      <span class="badge category-filter active-cat" data-category="indoor plant"
+           >Indoor Plant</span>
+
+      <span class="badge category-filter active-cat" data-category="outdoor plant"
+            >Outdoor Plant</span>
+
+      <span class="badge category-filter active-cat" data-category="succulent"
+          >Succulents & Cacti</span>
+
+      <span class="badge category-filter active-cat" data-category="herb"
+           >Herbs & Edible Plants</span>
+
+      <span class="badge category-filter active-cat" data-category="flowering plant"
+           >Flowering Plants</span>
+
+      <span class="badge category-filter active-cat" data-category="accessories and tools"
+           >Gardening Tools & Accessories</span>
+    </div>
+
+    <!-- Clear Category Button (shows only when a non-all category is active) -->
+    <button id="clearCategoryBtn" class="btn btn-sm btn-outline-danger ms-2 d-none">✖</button>
+  </div>
+
+  <!-- BANNER -->
+  <div id="bannerWrapper" class="mb-4">
+    <img src="/images/banner.png" alt="Banner" class="img-fluid shadow-sm"
+         style="border-radius:12px;height:220px;object-fit:cover;width:100%;animation:fadeIn 0.4s ease-in-out;">
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <h2 class="mb-4" style="color:#2d5a27;font-weight:bold;">🌱 Explore</h2>
+
+  {{#if products.length}}
+  <div class="row g-4" id="productsContainer">
+    {{#each products}}
+    <div class="col-6 col-sm-4 col-md-3 col-lg-2 product-card" data-category="{{this.category}}">
+      <div class="card shadow-sm h-100" style="border-radius:12px;transition:transform .15s;">
+        <img src="/images/products/{{this.image}}" class="card-img-top"
+             style="height:180px;object-fit:cover;border-top-left-radius:12px;border-top-right-radius:12px;">
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title mb-1" style="color:#2d5a27;font-weight:600;">{{this.name}}</h6>
+          <p class="card-text text-muted mb-2" style="font-size:0.82rem;max-height:36px;overflow:hidden;text-overflow:ellipsis;">
+            {{this.category}}
+          </p>
+          <p class="mt-auto mb-2 fw-semibold">₹{{this.price}}</p>
+          <a href="/view-product/{{this._id}}" class="btn btn-success w-100" style="border-radius:8px;">
+            <i class="bi bi-cart"></i> Buy
+          </a>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+
+  <p id="noResults" class="text-center text-muted mt-3 d-none">No results found.</p>
+
+  {{else}}
+  <p class="text-center text-muted">No products available at the moment.</p>
+  {{/if}}
+</div>
+
+<!-- JS Logic (robust & tolerant to category naming) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("searchInput");
+  const clearSearchBtn = document.getElementById("clearSearchBtn");
+  const categoryFilters = Array.from(document.querySelectorAll(".category-filter"));
+  const productCards = Array.from(document.querySelectorAll(".product-card"));
+  const noResults = document.getElementById("noResults");
+  const clearCategoryBtn = document.getElementById("clearCategoryBtn");
+  const bannerWrapper = document.getElementById("bannerWrapper");
+
+  const normalize = str => (str || "").toString().trim().toLowerCase();
+
+  // Ensure there's always an active badge (first = All)
+  function ensureActiveBadge() {
+    if (!document.querySelector(".category-filter.active-cat")) {
+      const first = categoryFilters[0];
+      if (first) first.classList.add("active-cat");
+      if (first) first.style.background = "#2d5a27", first.style.color = "#fff";
+    }
+  }
+  ensureActiveBadge();
+
+  function getActiveCategory() {
+    const el = document.querySelector(".category-filter.active-cat");
+    return el ? normalize(el.dataset.category || "all") : "all";
+  }
+
+  function setActiveBadge(el) {
+    categoryFilters.forEach(b => {
+      b.classList.remove("active-cat");
+      b.style.background = "";
+      b.style.color = "";
+    });
+    if (el) {
+      el.classList.add("active-cat");
+      el.style.background = "#2d5a27";
+      el.style.color = "#fff";
+    }
+  }
+
+  function updateClearButtons(hasActiveFilter) {
+    // show clear category button if a non-all is active
+    clearCategoryBtn.classList.toggle("d-none", !hasActiveFilter);
+  }
+
+  function filterProducts() {
+    const q = normalize(searchInput.value);
+    const activeCategory = getActiveCategory();
+
+    let visibleCount = 0;
+
+    productCards.forEach(card => {
+      const name = normalize(card.querySelector(".card-title")?.textContent || "");
+      const cardCategoryRaw = card.dataset.category || "";
+      const cardCategory = normalize(cardCategoryRaw);
+
+      // category match: robust includes to cover variations ("indoor plant" vs "indoor")
+      const matchesCategory = activeCategory === "all" ||
+                              cardCategory.includes(activeCategory) ||
+                              activeCategory.includes(cardCategory);
+
+      // search match
+      const matchesSearch = !q || name.includes(q) || cardCategory.includes(q);
+
+      if (matchesCategory && matchesSearch) {
+        card.classList.remove("d-none");
+        visibleCount++;
+      } else {
+        card.classList.add("d-none");
+      }
+    });
+
+    // banner visibility: hide banner when any filter/search active
+    const anyFilterActive = (q !== "" || activeCategory !== "all");
+    bannerWrapper.style.display = anyFilterActive ? "none" : "";
+
+    noResults.classList.toggle("d-none", visibleCount > 0);
+    updateClearButtons(activeCategory !== "all");
+    clearSearchBtn.style.display = q ? "" : "none";
+  }
+
+  // Event listeners
+  searchInput.addEventListener("input", filterProducts);
+  clearSearchBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    clearSearchBtn.style.display = "none";
+    filterProducts();
+    searchInput.focus();
+  });
+
+  categoryFilters.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      // toggle selection: clicking active resets to 'all'
+      if (btn.classList.contains("active-cat")) {
+        // revert to All (first badge)
+        setActiveBadge(categoryFilters[0]);
+      } else {
+        setActiveBadge(btn);
+      }
+      filterProducts();
+    });
+  });
+
+  clearCategoryBtn.addEventListener("click", () => {
+    // revert to 'all'
+    setActiveBadge(categoryFilters[0]);
+    filterProducts();
+  });
+
+  // initial filter run
+  filterProducts();
+});
+</script>
+
+<style>
+.product-card { transition: transform .15s, opacity .25s ease-in-out; }
+.product-card:hover { transform: scale(1.03); }
+
+#searchInput::placeholder { color: #999; }
+::-webkit-scrollbar { height:8px; }
+::-webkit-scrollbar-thumb { background:#bbb; border-radius:4px; }
+<style>
+/* Category badge base style */
+.badge.category-filter {
+  cursor: pointer;
+  user-select: none;
+  
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  color: #2d5a27;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Active (selected) category */
+.badge.category-filter.active-cat {
+  background-color: #2d5a27 !important;
+  color: #fff !important;
+  border-color: #2d5a27;
+  box-shadow: 0 2px 6px rgba(45,90,39,0.3);
+}
+
+/* Hover effects */
+.badge.category-filter:hover {
+  background-color: #e9f5e9;
+  border-color: #b7d3b7;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+/* When hovering the active one, make it pop slightly */
+.badge.category-filter.active-cat:hover {
+  background-color: #246b23 !important;
+  box-shadow: 0 4px 10px rgba(36,107,35,0.4);
+}
+
+/* Smooth transition on search clear button */
+#clearSearchBtn, #clearCategoryBtn {
+  transition: background 0.2s, transform 0.15s ease-in-out;
+}
+#clearSearchBtn:hover, #clearCategoryBtn:hover {
+  transform: scale(1.05);
+  background-color: #e6e6e6;
+}
+
+/* Product card hover remains */
+.product-card { transition: transform .15s, opacity .25s ease-in-out; }
+.product-card:hover { transform: scale(1.03); }
+
+/* Scrollbar cleanup */
+::-webkit-scrollbar { height:8px; }
+::-webkit-scrollbar-thumb { background:#bbb; border-radius:4px; }
+</style>
+

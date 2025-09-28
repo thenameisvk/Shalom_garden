@@ -1,0 +1,169 @@
+<div class="container mt-4">
+  <div class="row">
+    <!-- Left: Product Image -->
+    <div class="col-md-6 text-center">
+      <img src="/images/products/{{product.image}}" 
+           alt="{{product.name}}" 
+           class="shadow-sm"
+           style="width:100%;max-width:450px;height:400px;object-fit:cover;border-radius:12px;">
+    </div>
+
+    <!-- Right: Product Details -->
+    <div class="col-md-6">
+      <h2 class="fw-bold" style="color:#2d5a27;">{{product.name}}</h2>
+      <p class="text-muted mb-1">{{product.category}}</p>
+
+      <!-- ⭐ Average Rating -->
+      <p class="mb-2">
+        <strong>
+          ⭐ {{averageRating}} / 5 
+          <span class="text-muted" style="font-size:0.9rem;">({{totalReviews}} reviews)</span>
+        </strong>
+      </p>
+
+      <h4 class="fw-semibold mb-2">₹{{product.price}}</h4>
+      <p class="mb-2">Stock: 
+        {{#if product.stock}}
+          <span class="text-success fw-bold">{{product.stock}}</span>
+        {{else}}
+          <span class="text-danger">Out of Stock</span>
+        {{/if}}
+      </p>
+
+      <!-- Scrollable Description Box -->
+      <div style="max-height:120px;overflow-y:auto;padding:10px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;margin-bottom:15px;">
+        <p class="mb-0">{{product.description}}</p>
+      </div>
+
+      <!-- Add to Cart Button -->
+      <form action="/add-to-cart/{{product._id}}" method="POST">
+        <button type="submit" class="btn btn-success w-100" style="border-radius:8px;font-weight:bold;">
+          <i class="bi bi-basket-fill me-2"></i> Add to Cart
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ✅ Review Section -->
+  <div class="mt-5 card shadow-sm p-4" style="border-radius:12px;">
+    <h4 class="fw-bold mb-3" style="color:#2d5a27;">Customer Reviews</h4>
+
+    
+    
+
+    <!-- ✍️ Add Review Form (only if eligible) -->
+    {{#if canReview}}
+    <form action="/product/{{product._id}}/review" method="POST" class="mb-4">
+      <div class="mb-3">
+        <label class="form-label fw-bold">Your Rating</label>
+        <div class="d-flex flex-wrap gap-3">
+          <label class="emoji-option">
+            <input type="radio" name="rating" value="5" required hidden>
+            <span class="emoji">😍</span> Excellent
+          </label>
+          <label class="emoji-option">
+            <input type="radio" name="rating" value="4" required hidden>
+            <span class="emoji">😊</span> Good
+          </label>
+          <label class="emoji-option">
+            <input type="radio" name="rating" value="3" required hidden>
+            <span class="emoji">😐</span> Average
+          </label>
+          <label class="emoji-option">
+            <input type="radio" name="rating" value="2" required hidden>
+            <span class="emoji">☹️</span> Poor
+          </label>
+          <label class="emoji-option">
+            <input type="radio" name="rating" value="1" required hidden>
+            <span class="emoji">😡</span> Bad
+          </label>
+        </div>
+      </div>
+      <textarea name="comment" class="form-control mb-3" placeholder="Write your feedback..." required></textarea>
+      <button class="btn btn-success w-100">Submit Review</button>
+    </form>
+    {{else}}
+      {{#if (eq query.review "success")}}
+        <div class="alert alert-success">✅ Thanks for your feedback!</div>
+      {{/if}}
+    {{/if}}
+
+    <!-- 📝 Show All Reviews -->
+    {{#if reviews.length}}
+    <div class="list-group">
+      {{#each reviews}}
+        <div class="list-group-item d-flex justify-content-between align-items-start">
+          <div>
+            <strong>{{this.user.name}}</strong>
+            <span class="ms-2">
+              {{#if (eq this.rating 5)}}😍 Excellent
+              {{else if (eq this.rating 4)}}😊 Good
+              {{else if (eq this.rating 3)}}😐 Average
+              {{else if (eq this.rating 2)}}☹️ Poor
+              {{else}}😡 Bad{{/if}}
+            </span>
+            <p class="mb-1">{{this.comment}}</p>
+            <small class="text-muted">{{formatDate this.date}}</small>
+          </div>
+
+          {{#if this.isOwner}}
+          <div>
+            <!-- Edit Modal Trigger -->
+           
+            <form action="/product/{{../product._id}}/review/{{this._id}}/delete" method="POST" class="d-inline">
+              <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete your review?')">
+              <i class="bi bi-trash3-fill"></i>
+              </button>
+            </form>
+          </div>
+
+         
+              </div>
+            </div>
+          </div>
+          {{/if}}
+        </div>
+      {{/each}}
+    </div>
+    {{else}}
+      <p class="text-muted">No reviews yet. Be the first to review after delivery!</p>
+    {{/if}}
+  </div>
+
+  <!-- Related Products -->
+  {{#if relatedProducts.length}}
+  <div class="mt-5">
+    <h4 class="fw-bold mb-3" style="color:#2d5a27;">Similar Products</h4>
+    <div class="d-flex overflow-auto pb-3" style="gap:15px;">
+      {{#each relatedProducts}}
+      <div class="card shadow-sm" style="min-width:200px;max-width:200px;border-radius:10px;">
+        <img src="/images/products/{{this.image}}" 
+             class="card-img-top" 
+             style="height:150px;object-fit:cover;border-top-left-radius:10px;border-top-right-radius:10px;">
+        <div class="card-body text-center">
+          <h6 class="card-title">{{this.name}}</h6>
+          <p class="fw-semibold mb-1">₹{{this.price}}</p>
+          <a href="/view-product/{{this._id}}" class="btn btn-sm btn-success">View</a>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+</div>
+
+<style>
+.emoji-option {
+  cursor: pointer;
+  user-select: none;
+}
+.emoji-option input:checked + .emoji {
+  transform: scale(1.3);
+  transition: transform 0.2s ease-in-out;
+}
+.emoji {
+  font-size: 24px;
+  display: inline-block;
+  margin-right: 4px;
+}
+</style>

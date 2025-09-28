@@ -1,0 +1,45 @@
+<div class="container mt-4 pt-5" style="min-height:80vh;">
+  <div class="mb-4 float-end">
+    <a href="/" class="btn btn-outline-danger"><i class="bi bi-person-circle"></i>
+</a>
+  </div>
+  <h2 style="color:#2d5a27;font-weight:bold;" class="mb-4">Admin Dashboard</h2>
+
+  <div class="row g-4">
+    <!-- Total Users -->
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center" style="border-radius:12px;background:#e6f4ea;">
+      <a href="/admin/manage-users">
+        <div class="card-body">
+          <h5 style="color:#2d5a27;font-weight:bold;">👤 Total Users</h5>
+          <h2 style="color:#1b3b1a;font-weight:bold;">{{totalUsers}}</h2>
+        </div>
+          </a>
+      </div>
+    </div>
+
+    <!-- Total Products -->
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center" style="border-radius:12px;background:#e8f7f3;">
+       <a href="/admin/products">
+        <div class="card-body">
+          <h5 style="color:#155724;font-weight:bold;">🌱 Total Products</h5>
+          <h2 style="color:#0d3b2e;font-weight:bold;">{{totalProducts}}</h2>
+        </div>
+         </a>
+      </div>
+    </div>
+
+    <!-- Total Orders -->
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center" style="border-radius:12px;background:#fdf3e7;">
+<a href="/admin/manage-orders">
+<div class="card-body">
+          <h5 style="color:#8a4b08;font-weight:bold;">📦 Total Orders</h5>
+          <h2 style="color:#5a3304;font-weight:bold;">{{totalOrders}}</h2>
+        </div>
+          </a>
+      </div>
+    </div>
+  </div>
+</div>

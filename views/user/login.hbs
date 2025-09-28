@@ -1,0 +1,73 @@
+<div class="container mt-5" style="max-width:400px;">
+  <h3 class="text-center mb-4" style="color:#2d5a27;">Login</h3>
+
+  {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
+  <form method="POST" action="/login" onsubmit="return validateTerms()">
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Password</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <!-- ✅ Terms & Conditions -->
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="termsCheckbox">
+      <label class="form-check-label" for="termsCheckbox">
+        I agree to the 
+        <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" style="color:#2d5a27;font-weight:bold;">
+          Terms & Conditions
+        </a>
+      </label>
+    </div>
+
+    <button class="btn btn-success w-100">Login</button>
+  </form>
+
+  <p class="text-center mt-3">
+    Don't have an account? <a href="/signup">Sign Up</a>
+  </p>
+</div>
+
+<!-- ✅ Terms & Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius:12px;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="termsModalLabel" style="color:#2d5a27;">Terms & Conditions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Welcome to <strong>Shalom Garden</strong>! By using our website, you agree to the following terms:</p>
+        <ul>
+          <li>All plant orders are processed within 2-3 business days.</li>
+          <li>Returns are accepted only if plants are delivered in damaged condition (within 24 hours of delivery).</li>
+          <li>Refunds will be processed within 5-7 working days.</li>
+          <li>We do not guarantee plant growth after delivery, as it depends on proper care.</li>
+          <li>Your personal data will be protected and not shared with third parties.</li>
+        </ul>
+        <p class="mb-0">By clicking "Login", you accept these terms and our privacy policy.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function validateTerms() {
+  const checkbox = document.getElementById("termsCheckbox");
+  if (!checkbox.checked) {
+    alert("You must agree to the Terms & Conditions before logging in.");
+    return false;
+  }
+  return true;
+}
+</script>

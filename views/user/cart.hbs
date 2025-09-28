@@ -1,0 +1,72 @@
+<div class="container mt-4">
+  <h3 class="mb-4" style="color:#2d5a27;">🛒 Your Cart</h3>
+
+  {{#if cart.products.length}}
+  <div class="row">
+    <!-- Cart Table -->
+    <div class="col-lg-8">
+      <table class="table table-bordered align-middle shadow-sm">
+        <thead class="table-light">
+          <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th style="width:160px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each cart.products}}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <img src="/images/products/{{this.productId.image}}" alt="{{this.productId.name}}" 
+                     style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin-right:10px;">
+                <span>{{this.productId.name}}</span>
+              </div>
+            </td>
+            <td class="fw-bold">{{this.quantity}}</td>
+            <td class="fw-semibold">₹{{multiply this.productId.price this.quantity}}</td>
+            <td>
+              <form action="/cart/update/{{this.productId._id}}/inc" method="POST" class="d-inline">
+                <button class="btn btn-sm btn-success">+</button>
+              </form>
+              <form action="/cart/update/{{this.productId._id}}/dec" method="POST" class="d-inline">
+                <button class="btn btn-sm btn-warning">-</button>
+              </form>
+              <form action="/cart/remove/{{this.productId._id}}" method="POST" class="d-inline">
+                <button class="btn btn-sm btn-danger">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm p-3" style="border-radius:12px;">
+        <h5 class="fw-bold mb-3" style="color:#2d5a27;">Order Summary</h5>
+        <p class="d-flex justify-content-between mb-1">
+          <span>Subtotal</span>
+          <span class="fw-semibold">₹{{cartTotal}}</span>
+        </p>
+        <p class="d-flex justify-content-between mb-1">
+          <span>Delivery Fee</span>
+          <span class="fw-semibold">₹50</span>
+        </p>
+        <hr>
+        <p class="d-flex justify-content-between fs-5 fw-bold">
+          <span>Total</span>
+          <span style="color:#2d5a27;">₹{{grandTotal}}</span>
+        </p>
+        <a href="/checkout" class="btn btn-success w-100" style="border-radius:8px;">
+          Proceed to Payment
+        </a>
+      </div>
+    </div>
+  </div>
+  {{else}}
+  <p class="text-muted text-center mt-5">Your cart is empty.</p>
+  {{/if}}
+</div>

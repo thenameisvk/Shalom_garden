@@ -1,0 +1,21 @@
+<div class="container mt-5 pt-5" style="max-width:400px;">
+  <div class="card shadow-sm p-4" style="border-radius:12px;">
+    <h3 class="text-center mb-4" style="color:#2d5a27;"><i class="bi bi-shield-lock-fill"></i>Admin Login</h3>
+
+    {{#if error}}
+      <div class="alert alert-danger text-center">{{error}}</div>
+    {{/if}}
+
+    <form action="/admin/login" method="POST">
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" name="email" required placeholder="Enter admin email">
+      </div>
+      <div class="mb-3">
+        <label>Password</label>
+        <input type="password" class="form-control" name="password" required placeholder="Enter admin password">
+      </div>
+      <button class="btn btn-success w-100">Login</button>
+    </form>
+  </div>
+</div>
