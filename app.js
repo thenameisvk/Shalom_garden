@@ -17,13 +17,10 @@ var adminRouter = require('./routes/admin');
 var app = express();
 
 // ====== MONGOOSE CONNECTION ======
-mongoose.connect('mongodb://127.0.0.1:27017/shalom_garden', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('✅ MongoDB Connected Successfully'))
-.catch(err => console.error('❌ MongoDB Connection Failed:', err));
 
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.error("❌ MongoDB Connection Failed:", err));
 // ====== MIDDLEWARE ======
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
