@@ -302,7 +302,7 @@ verifyRazorpayPayment: async ({ razorpay_order_id, razorpay_payment_id, razorpay
     );
     return { success: false, message: "Server error verifying payment" };
   }
-}
+},
 
 
 };

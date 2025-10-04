@@ -6,13 +6,18 @@ const reviewSchema = new mongoose.Schema({
   comment: { type: String, required: true },
   date: { type: Date, default: Date.now }
 });
+
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   category: { type: String, required: true },
   price: { type: Number, required: true },
   stock: { type: Number, required: true },
   description: { type: String, required: true },
-  image: { type: String, required: true }, // store filename
+
+  // ✅ Cloudinary fields
+  image: { type: String, required: true },          // secure_url for display
+  imagePublicId: { type: String, required: true },  // public_id for deletion/update
+
   reviews: [reviewSchema],
   createdAt: { type: Date, default: Date.now }
 });

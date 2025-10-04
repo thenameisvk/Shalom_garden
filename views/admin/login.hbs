@@ -1,6 +1,8 @@
 <div class="container mt-5 pt-5" style="max-width:400px;">
   <div class="card shadow-sm p-4" style="border-radius:12px;">
-    <h3 class="text-center mb-4" style="color:#2d5a27;"><i class="bi bi-shield-lock-fill"></i>Admin Login</h3>
+    <h3 class="text-center mb-4" style="color:#ff0202;"><i class="bi bi-shield-lock-fill"></i>Admin Login</h3>
+    <p class="text-center">This is very secured, don't try to login.<br>
+    Only admin have access here.</p>
 
     {{#if error}}
       <div class="alert alert-danger text-center">{{error}}</div>
@@ -8,14 +10,14 @@
 
     <form action="/admin/login" method="POST">
       <div class="mb-3">
-        <label>Email</label>
-        <input type="email" class="form-control" name="email" required placeholder="Enter admin email">
+        <label>Username:</label>
+        <input type="text" class="form-control" name="username" required placeholder="Enter admin username">
       </div>
       <div class="mb-3">
-        <label>Password</label>
+        <label>Password:</label>
         <input type="password" class="form-control" name="password" required placeholder="Enter admin password">
       </div>
-      <button class="btn btn-success w-100">Login</button>
+      <button class="btn w-100" style="background-color:#ff0202; color:white;">Login</button>
     </form>
   </div>
 </div>

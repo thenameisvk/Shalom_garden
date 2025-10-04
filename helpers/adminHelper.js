@@ -2,13 +2,19 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Admin = require('../models/Admin');
+const cloudinary = require('../cloudinary');
 
 module.exports = {
+  // =====================
+  // PRODUCT HELPERS
+  // =====================
+
   addProduct: async (productData) => {
     try {
       const newProduct = new Product(productData);
       return await newProduct.save();
     } catch (err) {
+      console.error("Error in addProduct:", err);
       throw err;
     }
   },
@@ -17,33 +23,53 @@ module.exports = {
     try {
       return await Product.find().sort({ createdAt: -1 }).lean();
     } catch (err) {
+      console.error("Error in getAllProducts:", err);
+      throw err;
+    }
+  },
+
+  getProductById: async (id) => {
+    try {
+      return await Product.findById(id).lean();
+    } catch (err) {
+      console.error("Error in getProductById:", err);
+      throw err;
+    }
+  },
+
+  updateProduct: async (id, updateData) => {
+    try {
+      return await Product.findByIdAndUpdate(id, updateData, { new: true });
+    } catch (err) {
+      console.error("Error in updateProduct:", err);
       throw err;
     }
   },
 
   deleteProduct: async (id) => {
     try {
-      return await Product.findByIdAndDelete(id);
+      const product = await Product.findById(id);
+
+      if (product) {
+        // delete from Cloudinary first
+        if (product.imagePublicId) {
+          await cloudinary.uploader.destroy(product.imagePublicId);
+        }
+
+        return await Product.findByIdAndDelete(id);
+      }
+      return null;
     } catch (err) {
+      console.error("Error in deleteProduct:", err);
       throw err;
     }
   },
-  getProductById: async (id) => {
-  try {
-    return await Product.findById(id).lean();
-  } catch (err) {
-    throw err;
-  }
-},
 
-updateProduct: async (id, updateData) => {
-  try {
-    return await Product.findByIdAndUpdate(id, updateData);
-  } catch (err) {
-    throw err;
-  }
-},
- getTotalUsers: async () => {
+  // =====================
+  // DASHBOARD HELPERS
+  // =====================
+
+  getTotalUsers: async () => {
     return await User.countDocuments();
   },
 
@@ -54,53 +80,62 @@ updateProduct: async (id, updateData) => {
   getTotalOrders: async () => {
     return await Order.countDocuments();
   },
-    getAllOrders: async () => {
+
+  getAllOrders: async () => {
     return await Order.find()
-      .populate('userId', 'name email')              // fetch user details
-      .populate('products.productId') // fetch product details
+      .populate('userId', 'name email')       // user details
+      .populate('products.productId')         // product details
       .sort({ createdAt: -1 })
       .lean();
   },
 
   updateOrderStatus: async (orderId, status) => {
-  await Order.findByIdAndUpdate(orderId, { status });
-},
-getAllUsersWithReviews : async () => {
-  const users = await User.find().lean();
+    await Order.findByIdAndUpdate(orderId, { status });
+  },
 
-  // Attach reviews for each user
-  for (let user of users) {
-    const products = await Product.find({ "reviews.user": user._id })
-      .select("name reviews")
-      .lean();
+  // =====================
+  // USER & REVIEWS
+  // =====================
 
-    user.reviews = [];
+  getAllUsersWithReviews: async () => {
+    const users = await User.find().lean();
 
-    products.forEach(product => {
-      product.reviews.forEach(r => {
-        if (r.user.toString() === user._id.toString()) {
-          user.reviews.push({
-            _id: r._id,
-            rating: r.rating,
-            comment: r.comment,
-            date: r.date,
-            product: { name: product.name }
-          });
-        }
+    for (let user of users) {
+      const products = await Product.find({ "reviews.user": user._id })
+        .select("name reviews")
+        .lean();
+
+      user.reviews = [];
+
+      products.forEach(product => {
+        product.reviews.forEach(r => {
+          if (r.user.toString() === user._id.toString()) {
+            user.reviews.push({
+              _id: r._id,
+              rating: r.rating,
+              comment: r.comment,
+              date: r.date,
+              product: { name: product.name }
+            });
+          }
+        });
       });
-    });
-  }
-  return users;
-},
-deleteReview : async (reviewId) => {
-  const product = await Product.findOne({ "reviews._id": reviewId });
-  if (!product) throw new Error("Review not found");
+    }
+    return users;
+  },
 
-  product.reviews = product.reviews.filter(r => r._id.toString() !== reviewId);
-  await product.save();
-},
- 
- // ✅ FIXED: updateAdminInfo function
+  deleteReview: async (reviewId) => {
+    const product = await Product.findOne({ "reviews._id": reviewId });
+    if (!product) throw new Error("Review not found");
+
+    product.reviews = product.reviews.filter(r => r._id.toString() !== reviewId);
+    await product.save();
+  },
+
+  // =====================
+  // ADMIN INFO
+  // =====================
+
   updateAdminInfo: async (adminData) => {
     try {
       const newUpdate = new Admin(adminData);
@@ -120,18 +155,15 @@ deleteReview : async (reviewId) => {
     }
   },
 
-  // ✅ ADD: Get single admin info
   getAdminInfo: async () => {
     try {
-      const adminInfo = await Admin.findOne().sort({ createdAt: -1 }).lean();
-      return adminInfo || null;
+      return await Admin.findOne().sort({ createdAt: -1 }).lean();
     } catch (err) {
       console.error("Error in getAdminInfo:", err);
       return null;
     }
   },
 
-  // ✅ ADD: Update existing admin info
   updateAdminInfoById: async (id, adminData) => {
     try {
       return await Admin.findByIdAndUpdate(id, adminData, { new: true });
@@ -141,7 +173,6 @@ deleteReview : async (reviewId) => {
     }
   },
 
-  // ✅ ADD: Get admin info by ID
   getAdminInfoById: async (id) => {
     try {
       return await Admin.findById(id).lean();
@@ -149,5 +180,5 @@ deleteReview : async (reviewId) => {
       console.error("Error in getAdminInfoById:", err);
       throw err;
     }
-  },
+  }
 };

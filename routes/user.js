@@ -5,6 +5,7 @@ const Order = require("../models/Order");
 const userHelper = require("../helpers/userHelper");
 const adminHelper = require("../helpers/adminHelper");
 const { ensureUser } = require("../config/auth");
+const crypto = require("crypto");
 
 /**
  * Middleware: make session & cartCount available to all views (res.locals)
@@ -30,12 +31,47 @@ router.get("/", async (req, res) => {
 });
 
 /* Home */
+/* Home */
 router.get("/home", async (req, res) => {
   try {
     const products = await Product.find().lean();
+    
+    // Calculate average ratings for ALL products
+    const productsWithRatings = await Promise.all(
+      products.map(async (product) => {
+        try {
+          // Fetch reviews for each product
+          const reviews = await userHelper.getProductReviews(product._id);
+          
+          // Calculate average rating
+          const averageRating = reviews.length
+            ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+            : 0;
+          
+          // Count total reviews
+          const totalReviews = reviews.length;
+          
+          return {
+            ...product,
+            averageRating: parseFloat(averageRating), // Convert to number
+            totalReviews,
+            reviews // Optional: include reviews if needed
+          };
+        } catch (error) {
+          console.error(`Error fetching reviews for product ${product._id}:`, error);
+          return {
+            ...product,
+            averageRating: 0,
+            totalReviews: 0,
+            reviews: []
+          };
+        }
+      })
+    );
+
     res.render("user/home", {
       title: "Home",
-      products
+      products: productsWithRatings
     });
   } catch (err) {
     console.error("Home page error:", err);
@@ -358,4 +394,7 @@ router.get("/contact", ensureUser, async (req, res) => {
     });
   }
 });
+
+
+
 module.exports = router;

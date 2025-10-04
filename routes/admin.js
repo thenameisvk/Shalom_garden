@@ -1,12 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const path = require('path');
-const User = require('../models/User');
-const { ensureAdmin } = require('../config/auth');
-const adminHelper = require('../helpers/adminHelper');
-const Admin = require('../models/Admin');
-
-
+const User = require("../models/User");
+const Product = require("../models/Product");
+const { ensureAdmin } = require("../config/auth");
+const adminHelper = require("../helpers/adminHelper");
+const cloudinary = require("../cloudinary");
+const bcrypt = require("bcrypt");
 
 // ✅ Middleware: Set isAdmin flag for all admin pages
 router.use((req, res, next) => {
@@ -14,68 +13,71 @@ router.use((req, res, next) => {
   next();
 });
 
-// Admin Dashboard
-router.get('/',ensureAdmin, async (req, res) => {
+// Dashboard
+router.get("/", ensureAdmin, async (req, res) => {
   try {
     const totalUsers = await adminHelper.getTotalUsers();
     const totalProducts = await adminHelper.getTotalProducts();
     const totalOrders = await adminHelper.getTotalOrders();
 
-    res.render('admin/dashboard', {
-      title: 'Admin Dashboard',
+    res.render("admin/dashboard", {
+      title: "Admin Dashboard",
       totalUsers,
       totalProducts,
-      totalOrders
+      totalOrders,
     });
   } catch (err) {
     console.error("Dashboard error:", err);
-    res.render('admin/dashboard', {
-      title: 'Admin Dashboard',
+    res.render("admin/dashboard", {
+      title: "Admin Dashboard",
       totalUsers: 0,
       totalProducts: 0,
-      totalOrders: 0
+      totalOrders: 0,
     });
   }
 });
 
-// Add Product - GET
+// GET - add product form
 router.get('/add-product', ensureAdmin, (req, res) => {
   res.render('admin/add-product', { title: 'Add Product', layout: 'main' });
 });
 
-// Add Product - POST
-router.post('/add-product', async (req, res) => {
+// POST - add product
+router.post('/add-product', ensureAdmin, async (req, res) => {
   try {
     const { name, category, price, stock, description } = req.body;
-    const imageFile = req.files?.image;
 
-    if (!imageFile) {
-      return res.status(400).send('No image uploaded');
+    if (!req.files || !req.files.image) {
+      return res.redirect('/admin/add-product?error=Image is required');
     }
 
-    const imageName = Date.now() + '-' + imageFile.name;
-    const uploadPath = path.join(__dirname, '../public/images/products/', imageName);
+    // upload to Cloudinary
+    const result = await cloudinary.uploader.upload(req.files.image.tempFilePath, {
+      folder: "shalom-garden-products"
+    });
 
-    await imageFile.mv(uploadPath);
-
-    await adminHelper.addProduct({
+    const productData = {
       name,
       category,
       price,
       stock,
       description,
-      image: imageName
-    });
+      image: result.secure_url,        // ✅ cloudinary URL
+      imagePublicId: result.public_id  // ✅ cloudinary public_id
+    };
 
-    res.redirect('/admin/products');
-  } catch (error) {
-    console.error('Error adding product:', error);
-    res.status(500).send('Internal Server Error');
+    await adminHelper.addProduct(productData);
+    res.redirect('/admin/products?success=Product added successfully');
+  } catch (err) {
+    console.error("Error adding product:", err);
+    res.redirect('/admin/add-product?error=Failed to add product');
   }
 });
 
-// List Products
-router.get('/products',ensureAdmin, async (req, res) => {
+// =======================
+//  LIST PRODUCTS
+// =======================
+router.get('/products', ensureAdmin, async (req, res) => {
   try {
     const products = await adminHelper.getAllProducts();
     res.render('admin/products', { title: 'All Products', layout: 'main', products });
@@ -85,88 +87,117 @@ router.get('/products',ensureAdmin, async (req, res) => {
   }
 });
 
-// Delete Product
-router.get('/delete-product/:id', async (req, res) => {
-  try {
-    await adminHelper.deleteProduct(req.params.id);
-    res.redirect('/admin/products');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
-  }
-});
+// =======================
+//  EDIT PRODUCT
+// =======================
 
-// Edit Product - GET
-router.get('/edit-product/:id', async (req, res) => {
+// GET edit product form
+router.get('/edit-product/:id', ensureAdmin, async (req, res) => {
   try {
     const product = await adminHelper.getProductById(req.params.id);
-    res.render('admin/edit-product', { title: 'Edit Product', product });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
+    if (!product) return res.redirect('/admin/products');
+
+    res.render('admin/edit-product', { title: 'Edit Product', layout: 'main', product });
+  } catch (err) {
+    console.error("Edit product error:", err);
+    res.redirect('/admin/products?error=Product not found');
   }
 });
 
-// Edit Product - POST
-router.post('/edit-product/:id', async (req, res) => {
+// POST update product
+router.post('/edit-product/:id', ensureAdmin, async (req, res) => {
   try {
     const { name, category, price, stock, description } = req.body;
+    const product = await adminHelper.getProductById(req.params.id);
+
+    if (!product) return res.redirect('/admin/products?error=Product not found');
+
     let updateData = { name, category, price, stock, description };
 
-    if (req.files?.image) {
-      const imageFile = req.files.image;
-      const imageName = Date.now() + '-' + imageFile.name;
-      const uploadPath = path.join(__dirname, '../public/images/products/', imageName);
-      await imageFile.mv(uploadPath);
-      updateData.image = imageName;
+    // If a new image uploaded → replace old one
+    if (req.files && req.files.image) {
+      // delete old image from Cloudinary
+      if (product.imagePublicId) {
+        await cloudinary.uploader.destroy(product.imagePublicId);
+      }
+
+      // upload new image
+      const result = await cloudinary.uploader.upload(req.files.image.tempFilePath, {
+        folder: "shalom-garden-products"
+      });
+
+      updateData.image = result.secure_url;
+      updateData.imagePublicId = result.public_id;
     }
 
     await adminHelper.updateProduct(req.params.id, updateData);
-    res.redirect('/admin/products');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
+    res.redirect('/admin/products?success=Product updated');
+  } catch (err) {
+    console.error("Update product error:", err);
+    res.redirect('/admin/products?error=Failed to update');
   }
 });
-router.get('/manage-orders', ensureAdmin, async (req, res) => {
+
+// =======================
+//  DELETE PRODUCT
+// =======================
+router.get('/delete-product/:id', ensureAdmin, async (req, res) => {
+  try {
+    const product = await adminHelper.getProductById(req.params.id);
+
+    if (product && product.imagePublicId) {
+      // delete image from Cloudinary
+      await cloudinary.uploader.destroy(product.imagePublicId);
+    }
+
+    await adminHelper.deleteProduct(req.params.id);
+    res.redirect('/admin/products?success=Deleted successfully');
+  } catch (err) {
+    console.error("Delete product error:", err);
+    res.redirect('/admin/products?error=Failed to delete');
+  }
+});
+// ==========================
+// Manage Orders
+// ==========================
+router.get("/manage-orders", ensureAdmin, async (req, res) => {
   try {
     const orders = await adminHelper.getAllOrders();
-    res.render('admin/manage-orders', {
-      layout: 'main',
-      orders
+    res.render("admin/manage-orders", {
+      title: "Manage Orders",
+      orders,
     });
   } catch (error) {
     console.error("Error fetching orders:", error);
-    res.redirect('/admin');
+    res.redirect("/admin/dashboard");
   }
 });
-
-// Update Order Status
-router.post('/manage-orders/update-status/:id', ensureAdmin, async (req, res) => {
+// ✅ Manage Orders
+router.post("/manage-orders/update-status/:id", ensureAdmin, async (req, res) => {
   try {
     await adminHelper.updateOrderStatus(req.params.id, req.body.status);
-    res.redirect('/admin/manage-orders');
+    res.redirect("/admin/manage-orders");
   } catch (error) {
     console.error("Error updating order status:", error);
-    res.redirect('/admin/manage-orders');
+    res.redirect("/admin/manage-orders");
   }
 });
-// ✅ Manage Users Route (with Reviews)
-router.get('/manage-users', ensureAdmin, async (req, res) => { 
-  try {
-    const users = await adminHelper.getAllUsersWithReviews(); // <-- Use helper
 
-    res.render('admin/manage-users', {
-      layout: 'main',
-      title: 'Manage Users',
-      users
+// ✅ Manage Users (with Reviews)
+router.get("/manage-users", ensureAdmin, async (req, res) => {
+  try {
+    const users = await adminHelper.getAllUsersWithReviews();
+    res.render("admin/manage-users", {
+      title: "Manage Users",
+      users,
     });
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.redirect('/admin/dashboard');
+    res.redirect("/admin/dashboard");
   }
 });
-router.post("/review/:reviewId/delete", async (req, res) => {
+
+router.post("/review/:reviewId/delete", ensureAdmin, async (req, res) => {
   try {
     await adminHelper.deleteReview(req.params.reviewId);
     res.redirect("back");
@@ -176,90 +207,89 @@ router.post("/review/:reviewId/delete", async (req, res) => {
   }
 });
 
-
-// Block / Unblock User
-router.post('/manage-users/toggle/:id', ensureAdmin, async (req, res) => {
+// ✅ Block / Unblock User
+router.post("/manage-users/toggle/:id", ensureAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     user.isBlocked = !user.isBlocked;
     await user.save();
-    res.redirect('/admin/manage-users');
+    res.redirect("/admin/manage-users");
   } catch (error) {
     console.error("Error blocking/unblocking user:", error);
-    res.redirect('/admin/manage-users');
+    res.redirect("/admin/manage-users");
   }
 });
-// Admin login page
-router.get('/login', (req, res) => {
-  if (req.session.isAdmin) return res.redirect('/admin/dashboard');
-  res.render('admin/login', { layout: 'main' });
+
+
+
+// ✅ Admin Login
+router.get("/login", (req, res) => {
+  if (req.session.isAdmin) return res.redirect("/admin");
+  res.render("admin/login", { title: "Admin Login" });
 });
 
-// Admin login POST
-router.post('/login', (req, res) => {
-  const { email, password } = req.body;
+router.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-  // Hardcoded admin credentials
-  if (email === "sachu@gmail.com" && password === "1307") {
+    // Read from ENV
+    const adminUsername = process.env.ADMIN_USERNAME;
+    const adminPasswordHash = process.env.ADMIN_PASSWORD;
+
+    if (username !== adminUsername) {
+      return res.render("admin/login", { error: "Invalid username or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, adminPasswordHash);
+    if (!isMatch) {
+      return res.render("admin/login", { error: "Invalid username or password" });
+    }
+
+    // ✅ Set session
     req.session.isAdmin = true;
-    req.session.admin = { name: "Admin", email }; // store for header display
-    return res.redirect('/admin');
-  } else {
-    return res.render('admin/login', { layout: 'main', error: "Invalid credentials" });
+    req.session.admin = { username: adminUsername };
+    res.redirect("/admin");
+  } catch (err) {
+    console.error("Admin login error:", err);
+    res.render("admin/login", { error: "Something went wrong" });
   }
 });
 
-// Admin logout
-router.get('/logout', (req, res) => {
-  req.session.isAdmin = false;
-  req.session.admin = null;
-  res.redirect('/admin/login');
+// ✅ Logout
+router.get("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie("connect.sid");
+    res.redirect("/admin/login");
+  });
 });
 
-// In admin.js - Fix the about routes
 
-// In admin.js - Use POST for both create and update
-
-// About Page - GET (Show form with existing data)
-router.get('/about', ensureAdmin, async (req, res) => {
+// ✅ Admin About Info
+router.get("/about", ensureAdmin, async (req, res) => {
   try {
     const adminInfo = await adminHelper.getAdminInfo();
-    const success = req.query.success;
-    const error = req.query.error;
-    
-    res.render('admin/about', { 
-      title: 'Admin Contact Details', 
-      layout: 'main', 
+    res.render("admin/about", {
+      title: "Admin Contact Details",
       adminInfo,
-      success,
-      error
+      success: req.query.success,
+      error: req.query.error,
     });
   } catch (error) {
     console.error("Error fetching admin info:", error);
-    res.render('admin/about', { 
-      title: 'Admin Contact Details', 
-      layout: 'main', 
+    res.render("admin/about", {
+      title: "Admin Contact Details",
       adminInfo: null,
-      error: "Failed to load admin information"
+      error: "Failed to load admin information",
     });
   }
 });
 
-// In the POST route, add detailed logging
-router.post('/about', ensureAdmin, async (req, res) => {
+router.post("/about", ensureAdmin, async (req, res) => {
   try {
-    console.log("POST /admin/about received");
-    console.log("Request body:", req.body);
-    
     const { email, mobile, instagramlink, facebooklink, youtubelink, twitterlink, whatsapplink } = req.body;
-    
-    // Check if admin info already exists
     const existingAdmin = await adminHelper.getAdminInfo();
-    console.log("Existing admin:", existingAdmin);
-    
+
     if (existingAdmin) {
-      console.log("Updating existing admin with ID:", existingAdmin._id);
-      // Update existing
       await adminHelper.updateAdminInfoById(existingAdmin._id, {
         email,
         mobile,
@@ -267,13 +297,10 @@ router.post('/about', ensureAdmin, async (req, res) => {
         facebooklink,
         youtubelink,
         twitterlink,
-        whatsapplink
+        whatsapplink,
       });
-      console.log("Update successful");
-      return res.redirect('/admin/about?success=Contact details updated successfully');
+      return res.redirect("/admin/about?success=Contact details updated successfully");
     } else {
-      console.log("Creating new admin info");
-      // Create new
       await adminHelper.updateAdminInfo({
         email,
         mobile,
@@ -281,37 +308,14 @@ router.post('/about', ensureAdmin, async (req, res) => {
         facebooklink,
         youtubelink,
         twitterlink,
-        whatsapplink
+        whatsapplink,
       });
-      console.log("Create successful");
-      return res.redirect('/admin/about?success=Contact details added successfully');
+      return res.redirect("/admin/about?success=Contact details added successfully");
     }
   } catch (error) {
-    console.error('Error in /admin/about POST:', error);
-    res.redirect('/admin/about?error=Failed to save contact details: ' + error.message);
+    console.error("Error in /admin/about POST:", error);
+    res.redirect("/admin/about?error=Failed to save contact details");
   }
 });
-// PUT route for editing (optional - if you want separate endpoint)
-router.put('/about/:id', ensureAdmin, async (req, res) => {
-  try {
-    const { email, mobile, instagramlink, facebooklink, youtubelink, twitterlink, whatsapplink } = req.body;
-    
-    await adminHelper.updateAdminInfoById(req.params.id, {
-      email,
-      mobile,
-      instagramlink,
-      facebooklink,
-      youtubelink,
-      twitterlink,
-      whatsapplink
-    });
-    
-    res.redirect('/admin/about?success=Contact details updated successfully');
-  } catch (error) {
-    console.error('Error updating admin info:', error);
-    res.redirect('/admin/about?error=Failed to update contact details');
-  }
-});
-
 
 module.exports = router;
