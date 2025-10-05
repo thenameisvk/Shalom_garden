@@ -10,6 +10,7 @@ var logger = require('morgan');
 var methodOverride = require('method-override');
 var crypto = require('crypto');
 var bodyParser = require('body-parser');
+const MongoStore = require("connect-mongo");
 require('dotenv').config();
 
 
@@ -174,19 +175,26 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 // ====== SESSION SETUP ======
+
+
 app.use(
   session({
     secret: sessionSecret,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions",
+    }),
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 1000 * 60 * 60, // 1 hour
     },
   })
 );
+
 
 // ====== OTHER MIDDLEWARE ======
 app.use(methodOverride('_method'));
