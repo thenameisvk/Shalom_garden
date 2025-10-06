@@ -174,9 +174,10 @@ app.engine(
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
+// Trust proxy for Render/other hosting services
+app.set('trust proxy', 1);
+
 // ====== SESSION SETUP ======
-
-
 app.use(
   session({
     secret: sessionSecret,
