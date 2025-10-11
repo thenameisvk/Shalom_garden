@@ -74,7 +74,29 @@
     <h2 class="mb-0 section-title">🌱 Explore Our Collection</h2>
     <small class="text-muted product-count" id="productCount"></small>
   </div>
-
+ <!-- 🔽 Price Filter Dropdown -->
+    <div class="dropdown">
+      <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="priceFilterBtn" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius:8px;">
+        💰 Price Filter
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end p-2 shadow-sm" aria-labelledby="priceFilterBtn" style="min-width:200px;">
+        <li><a class="dropdown-item price-filter" data-min="0" data-max="50">Below ₹50</a></li>
+        <li><a class="dropdown-item price-filter" data-min="50" data-max="100">₹50 - ₹100</a></li>
+        <li><a class="dropdown-item price-filter" data-min="100" data-max="200">₹100 - ₹200</a></li>
+        <li><a class="dropdown-item price-filter" data-min="200" data-max="500">₹200 - ₹500</a></li>
+        <li><a class="dropdown-item price-filter" data-min="500" data-max="1000">₹500 - ₹1000</a></li>
+        <li><a class="dropdown-item price-filter" data-min="1000" data-max="999999">Above ₹1000</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="px-2">
+          <input type="number" id="customPrice" class="form-control form-control-sm" placeholder="Custom max ₹" min="1" style="font-size:0.85rem;">
+        </li>
+        <li class="px-2 pt-2">
+          <button id="applyCustomPrice" class="btn btn-success btn-sm w-100">Apply</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
   {{#if products.length}}
   <div class="row g-4" id="productsContainer">
     {{#each products}}
@@ -303,6 +325,63 @@ document.addEventListener("DOMContentLoaded", () => {
   ensureActiveBadge();
   filterProducts();
 });
+// Price Filter Logic
+const priceFilterButtons = document.querySelectorAll('.price-filter');
+const customPriceInput = document.getElementById('customPrice');
+const applyCustomPriceBtn = document.getElementById('applyCustomPrice');
+
+let priceRange = { min: 0, max: Infinity };
+
+// Function to filter by price (used along with your search/category filters)
+function filterByPrice() {
+  const products = document.querySelectorAll('.product-card');
+  let visibleCount = 0;
+
+  products.forEach(card => {
+    const priceText = card.querySelector('.product-price')?.textContent.replace(/[₹,]/g, '').trim();
+    const price = parseFloat(priceText) || 0;
+
+    const matchesPrice = price >= priceRange.min && price <= priceRange.max;
+    if (matchesPrice) {
+      card.style.display = '';
+      card.classList.remove('d-none');
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+      card.classList.add('d-none');
+    }
+  });
+
+  // Update product count
+  const totalProducts = products.length;
+  document.getElementById('productCount').textContent = `${visibleCount} of ${totalProducts} products`;
+}
+
+// Attach listeners to price range items
+priceFilterButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const min = parseFloat(btn.dataset.min);
+    const max = parseFloat(btn.dataset.max);
+    priceRange = { min, max };
+    filterByPrice();
+
+    // Visual feedback
+    priceFilterButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Custom Price Apply
+applyCustomPriceBtn.addEventListener('click', () => {
+  const customMax = parseFloat(customPriceInput.value);
+  if (!isNaN(customMax) && customMax > 0) {
+    priceRange = { min: 0, max: customMax };
+    filterByPrice();
+  } else {
+    alert("Please enter a valid price.");
+  }
+});
+
 </script>
 
 <style>
@@ -716,4 +795,22 @@ document.addEventListener("DOMContentLoaded", () => {
   padding-left: calc(var(--bs-gutter-x) * 0.5);
   margin-bottom: var(--bs-gutter-y);
 }
+
+.dropdown-menu .dropdown-item.active {
+  background: #2d5a27;
+  color: white;
+  border-radius: 6px;
+}
+#priceFilterBtn {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.dropdown-menu input {
+  border: 1px solid #ddd;
+}
+.dropdown-menu input:focus {
+  border-color: #2d5a27;
+  box-shadow: 0 0 4px rgba(45,90,39,0.3);
+}
+
 </style>
