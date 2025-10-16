@@ -1,48 +1,280 @@
 <div class="container my-5 align-items-center" style="max-width:900px;">
   <!-- Header -->
-  <div class="text-center mb-4">
-    <h2 class="fw-bold" style="color:#2d5a27;">📞 Contact Us</h2>
-    <p class="text-muted">We are here to help you with any queries.</p>
+  <div class="text-center mb-5">
+    <h2 class="fw-bold mb-3 animate-fade-in" style="color:#2d5a27;">📞 Contact Us</h2>
+    <p class="text-muted fs-5 animate-fade-in-delay">We are here to help you with any queries</p>
   </div>
 
   {{#each admins}}
-
-    <!-- Right: Help & Support -->
-    <div class="col-md-6 align-items-center">
-      <h4 class="fw-bold mb-3" style="color:#2d5a27;">Help & Support</h4>
-      <div class="card p-3 shadow-sm border-0 mb-3">
-        <h6 class="fw-bold">📧 Email Support</h6>
-        <p>Send a mail</p>
-        <p class="mb-0">{{this.email}}</p>
-      </div>
-      <div class="card p-3 shadow-sm border-0 mb-3">
-        <h6 class="fw-bold">📱 Call / WhatsApp</h6>
-        <p>For clear your doubts, just call or send a message</p>
-        <p class="mb-0">+91 {{this.mobile}}</p>
-      </div>
-      
-
-      <!-- Social Media Links -->
-      <div class="mt-4">
-        <h5 class="fw-bold" style="color:#2d5a27;">Follow Us</h5>
-        <div class="d-flex gap-3 mt-2">
-          <a href="{{this.facebooklink}}" target="_blank" class="text-decoration-none">
-            <i class="bi bi-facebook fs-3 text-primary"></i>
-          </a>
-          <a href="{{this.instagramlink}}" target="_blank" class="text-decoration-none">
-            <i class="bi bi-instagram fs-3" style="color:#e1306c;"></i>
-          </a>
-          <a href="{{this.twitterlink}}" target="_blank" class="text-decoration-none">
-            <i class="bi bi-twitter fs-3 text-info"></i>
-          </a>
-          <a href="{{this.whatsapplink}}" target="_blank" class="text-decoration-none">
-            <i class="bi bi-whatsapp fs-3 text-success"></i>
-          </a>
-          <a href="{{this.youtubelink}}" target="_blank" class="text-decoration-none">
-            <i class="bi bi-youtube fs-3 text-danger"></i>
+  <div class="row g-4">
+    <!-- Left: Contact Cards -->
+    <div class="col-md-6">
+      <div class="card p-4 shadow-sm border-0 h-100 animate-slide-in-left">
+        <h4 class="fw-bold mb-4" style="color:#2d5a27;">Get In Touch</h4>
+        
+        <!-- Email Support -->
+        <div class="d-flex align-items-start mb-4 contact-item">
+          <div class="me-3 mt-1">
+            <div class="rounded-circle d-flex align-items-center justify-content-center contact-icon" style="width: 40px; height: 40px; background-color: #e8f5e9;">
+              <i class="bi bi-envelope-fill" style="color:#2d5a27;"></i>
+            </div>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Email Support</h6>
+            <p class="text-muted mb-1">Send us a message anytime</p>
+            <a href="mailto:{{this.email}}" class="text-decoration-none contact-link" style="color:#2d5a27;">{{this.email}}</a>
+          </div>
+        </div>
+        
+        <!-- Phone Support -->
+        <div class="d-flex align-items-start mb-4 contact-item">
+          <div class="me-3 mt-1">
+            <div class="rounded-circle d-flex align-items-center justify-content-center contact-icon" style="width: 40px; height: 40px; background-color: #e8f5e9;">
+              <i class="bi bi-telephone-fill" style="color:#2d5a27;"></i>
+            </div>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Call / WhatsApp</h6>
+            <p class="text-muted mb-1">For quick resolution of your queries</p>
+            <a href="tel:+91{{this.mobile}}" class="text-decoration-none contact-link" style="color:#2d5a27;">+91 {{this.mobile}}</a>
+          </div>
+        </div>
+        
+        <!-- Location -->
+        <div class="d-flex align-items-start contact-item">
+          <div class="me-3 mt-1">
+            <div class="rounded-circle d-flex align-items-center justify-content-center contact-icon" style="width: 40px; height: 40px; background-color: #e8f5e9;">
+              <i class="bi bi-geo-alt-fill" style="color:#2d5a27;"></i>
+            </div>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Our Location</h6>
+            <p class="text-muted mb-1">Visit us at our office</p>
+            <a class="text-decoration-none" href="https://maps.app.goo.gl/8Pd2Edhnugy9G1xp7?g_st=aw">
+            <p class="mb-0 contact-link" style="color:#2d5a27;"><i class="bi bi-geo-alt-fill"></i> Open Google Map</p>
+            </a>
+          </div>
         </div>
       </div>
     </div>
-  {{/each}}
+
+    <!-- Right: Social Media & Follow Us -->
+    <div class="col-md-6">
+      <div class="card p-4 shadow-sm border-0 h-100 animate-slide-in-right">
+        <h4 class="fw-bold mb-4" style="color:#2d5a27;">Connect With Us</h4>
+        
+        <!-- Social Media Links -->
+        <div class="mb-4">
+          <p class="text-muted mb-3">Follow us on social media for updates and news</p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="{{this.facebooklink}}" target="_blank" class="text-decoration-none social-media-item">
+              <div class="position-relative">
+                <div class="rounded-circle d-flex align-items-center justify-content-center social-icon" style="width: 50px; height: 50px; background-color: #e8f5e9;">
+                  <i class="bi bi-facebook fs-5" style="color:#2d5a27;"></i>
+                </div>
+                <span class="social-tooltip">Facebook</span>
+              </div>
+            </a>
+            <a href="{{this.instagramlink}}" target="_blank" class="text-decoration-none social-media-item">
+              <div class="position-relative">
+                <div class="rounded-circle d-flex align-items-center justify-content-center social-icon" style="width: 50px; height: 50px; background-color: #e8f5e9;">
+                  <i class="bi bi-instagram fs-5" style="color:#2d5a27;"></i>
+                </div>
+                <span class="social-tooltip">Instagram</span>
+              </div>
+            </a>
+            <a href="{{this.twitterlink}}" target="_blank" class="text-decoration-none social-media-item">
+              <div class="position-relative">
+                <div class="rounded-circle d-flex align-items-center justify-content-center social-icon" style="width: 50px; height: 50px; background-color: #e8f5e9;">
+                  <i class="bi bi-twitter fs-5" style="color:#2d5a27;"></i>
+                </div>
+                <span class="social-tooltip">Twitter</span>
+              </div>
+            </a>
+            <a href="{{this.whatsapplink}}" target="_blank" class="text-decoration-none social-media-item">
+              <div class="position-relative">
+                <div class="rounded-circle d-flex align-items-center justify-content-center social-icon" style="width: 50px; height: 50px; background-color: #e8f5e9;">
+                  <i class="bi bi-whatsapp fs-5" style="color:#2d5a27;"></i>
+                </div>
+                <span class="social-tooltip">WhatsApp</span>
+              </div>
+            </a>
+            <a href="{{this.youtubelink}}" target="_blank" class="text-decoration-none social-media-item">
+              <div class="position-relative">
+                <div class="rounded-circle d-flex align-items-center justify-content-center social-icon" style="width: 50px; height: 50px; background-color: #e8f5e9;">
+                  <i class="bi bi-youtube fs-5" style="color:#2d5a27;"></i>
+                </div>
+                <span class="social-tooltip">YouTube</span>
+              </div>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Response Time -->
+        <div class="mt-auto">
+          <div class="alert alert-light border-0 animate-pulse" style="background-color: #f8f9fa;">
+            <div class="d-flex align-items-center">
+              <i class="bi bi-clock-history me-2" style="color:#2d5a27;"></i>
+              <div>
+                <h6 class="mb-1 fw-bold" style="color:#2d5a27;">Quick Response</h6>
+                <p class="mb-0 small text-muted">We typically respond within 24 hours</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+  {{/each}}
 </div>
+
+<style>
+  /* Animation Keyframes */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideInLeft {
+    from { 
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes slideInRight {
+    from { 
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  
+  /* Animation Classes */
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+  }
+  
+  .animate-fade-in-delay {
+    animation: fadeIn 1s ease-out 0.3s both;
+  }
+  
+  .animate-slide-in-left {
+    animation: slideInLeft 0.8s ease-out;
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out;
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s infinite;
+  }
+  
+  /* Hover Effects */
+  .contact-item {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    padding: 8px;
+    border-radius: 8px;
+  }
+  
+  .contact-item:hover {
+    transform: translateY(-5px);
+    background-color: rgba(233, 245, 233, 0.3);
+  }
+  
+  .contact-icon {
+    transition: all 0.3s ease;
+  }
+  
+  .contact-item:hover .contact-icon {
+    background-color: #2d5a27 !important;
+    transform: scale(1.1);
+  }
+  
+  .contact-item:hover .contact-icon i {
+    color: white !important;
+  }
+  
+  .contact-link {
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .contact-link:hover {
+    color: #1e3e1a !important;
+    text-decoration: underline !important;
+  }
+  
+  /* Social Media Hover Effects */
+  .social-media-item {
+    transition: all 0.3s ease;
+  }
+  
+  .social-icon {
+    transition: all 0.3s ease;
+  }
+  
+  .social-media-item:hover .social-icon {
+    background-color: #2d5a27 !important;
+    transform: scale(1.1);
+    animation: bounce 0.5s;
+  }
+  
+  .social-media-item:hover .social-icon i {
+    color: white !important;
+  }
+  
+  /* Social Media Tooltips */
+  .social-tooltip {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2d5a27;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+  
+  .social-media-item:hover .social-tooltip {
+    opacity: 1;
+    visibility: visible;
+    bottom: -35px;
+  }
+  
+  /* Card Hover Effects */
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+</style>
